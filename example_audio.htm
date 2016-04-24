@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<meta http-equiv="no-cache">
+	<meta http-equiv="Expires" content="-1">
+	<meta http-equiv="Cache-Control" content="no-cache">
+
+	<head>
+		<title>3D course</title>
+
+		<!-- PLEASE READ THE README FILE wich contains explanations on all the functions
+			 in the Canvas3D library -->
+
+		<!-- these are the libraries needed to run this example,
+			we need some jquery stuff, but also some libs that are used to support
+			the canvas3D library such as csg.js, three.js for 3D rendering, 
+			and objLoader and -exporter in order to load/save .obj files 
+			
+			you can find documentation on these libraries here:
+			http://jquery.org
+			http://threejs.org
+			http://learningthreejs.com/blog/2011/12/10/constructive-solid-geometry-with-csg-js/
+			http://threejs.org/examples/webgl_loader_obj.html
+		-->
+		<script src="lib/jquery-1.8.3.js" type="text/javascript"></script>
+	    <script src="lib/jquery.timer.js" type="text/javascript" ></script>
+		<script src="lib/csg.js"></script>
+		<script src="lib/three.js"></script>
+		<script src="lib/ThreeCSG.js"></script>
+		<script src="lib/OrbitControls.js"></script>
+		<script src="lib/objloader.js"></script>
+		<script src="lib/objexporter.js"></script>
+		<!-- the 'RT' library is my own set of utility finctions, only used
+			to support some math and graphics stuff. there is no documentation
+			on this, but thats not necessary anyway, because you don't interact with it directly ;)
+		-->
+		<script src="lib/RT/RT.js" type="text/javascript" ></script>
+		<script src="lib/RT/Error.js" type="text/javascript" ></script>
+		<script src="lib/RT/Utils.js" type="text/javascript" ></script>
+		<script src="lib/RT/Vec2.js" type="text/javascript" ></script>
+		<script src="lib/RT/MouseInterface.js" type="text/javascript" ></script>
+		<script src="lib/RT/Event.js" type="text/javascript" ></script>
+		<script src="lib/RT/EventDispatcherInterface.js" type="text/javascript" ></script>
+		<script src="lib/RT/KeyboardInterface.js" type="text/javascript" ></script>
+		<script src="lib/RT/LayerInterface.js" type="text/javascript" ></script>
+		<script src="lib/RT/Layer.js" type="text/javascript" ></script>
+
+		<!-- audio stuff -->
+		<script src="lib/shim/Base64.js" type="text/javascript"></script>
+		<script src="lib/shim/Base64binary.js" type="text/javascript"></script>
+		<script src="lib/shim/WebAudioAPI.js" type="text/javascript"></script>
+		<!-- midi.js package -->
+		<script src="lib/midi/audioDetect.js" type="text/javascript"></script>
+		<script src="lib/midi/gm.js" type="text/javascript"></script>
+		<script src="lib/midi/loader.js" type="text/javascript"></script>
+		<script src="lib/midi/plugin.audiotag.js" type="text/javascript"></script>
+		<script src="lib/midi/plugin.webaudio.js" type="text/javascript"></script>
+		<script src="lib/midi/plugin.webmidi.js" type="text/javascript"></script>
+		<!-- utils -->
+		<script src="lib/util/dom_request_xhr.js" type="text/javascript"></script>
+		<script src="lib/util/dom_request_script.js" type="text/javascript"></script>
+
+		<!-- and finally the actual Canvas3D library -->
+		<script src="lib/Canvas3D.js" type="text/javascript" ></script>
+	</head>
+	
+	<body onload="init();">
+
+		<script type="text/javascript">
+
+			// create a new 3d canvas
+			var canvas3D = new KABK.Canvas3D();
+
+			var positions = [];
+			var boxes = [];
+
+			// the audio equipment
+			var analyser;
+			var audioContext;
+			var audioSrc;
+			var audio;
+
+			var audioContext = new AudioContext();
+			var BUFF_SIZE = 16384;
+			var audioInput = null;
+			var microphone_stream = null;
+			var gain_node = null;
+			var script_processor_node = null;
+			var script_processor_fft_node = null;
+			var analyserNode = null;
+
+			init = function() {
+				// initialize it when the page has loaded and the 'init' function is called
+				canvas3D.initialize();
+
+				// stop making me dizzy
+				canvas3D.setAutoRotate( false );
+
+				// position the camera
+				canvas3D.setCameraPosition( 1250, 1150, 1150 );
+				canvas3D.setCameraCenter( 210, 10, 10 );
+
+				canvas3D.setBackgroundColor( 0.8, 0.8, 0.8 );
+
+				for( var i = 0; i < 100; i++ ){
+					positions.push( 0 );
+					canvas3D.colorRGB( 1.0, i / 99, 0.0 );
+					canvas3D.translate( 10, 0, 0 );
+					boxes.push( canvas3D.box( 10, 10, 10 ) );
+				}
+
+				// save the scene as an .obj file
+//				canvas3D.saveOBJ();
+
+			    if (!navigator.getUserMedia)
+			            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+			                          navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+			    if (navigator.getUserMedia){
+			        navigator.getUserMedia({audio:true}, 
+			          function(stream) {
+			              start_microphone(stream);
+			          },
+			          function(e) {
+			            alert('Error capturing audio.');
+			          }
+			        );
+			    } else { alert('getUserMedia not supported in this browser.'); }
+
+				requestAnimationFrame( onRequestAnimationFrame );
+			}
+
+			onRequestAnimationFrame = function() {
+				canvas3D.update();
+				for( var i = 0; i < positions.length; i++ ){
+					var p = boxes[ i ].getPosition()
+					boxes[ i ].setPosition( p[ 0 ], positions[ i ], p[ 2 ] );
+				}
+				canvas3D.draw();
+				requestAnimationFrame( onRequestAnimationFrame );
+			}
+
+		    show_some_data = function(given_typed_array, num_row_to_display, label) {
+		        var size_buffer = given_typed_array.length;
+		        var index = 0;
+		        var max_index = num_row_to_display;
+
+		        console.log("__________ " + label);
+
+		        for (; index < max_index && index < size_buffer; index += 1) {
+
+		            console.log(given_typed_array[index]);
+		        }
+		    }
+
+		    process_microphone_buffer = function(event) {
+		        var i, N, inp, microphone_output_buffer;
+		        microphone_output_buffer = event.inputBuffer.getChannelData(0); // just mono - 1 channel for now
+		        // microphone_output_buffer  <-- this buffer contains current gulp of data size BUFF_SIZE
+		        show_some_data(microphone_output_buffer, 5, "from getChannelData");
+		    }
+
+		    start_microphone = function (stream){
+		      gain_node = audioContext.createGain();
+		      gain_node.connect( audioContext.destination );
+
+		      microphone_stream = audioContext.createMediaStreamSource(stream);
+		      microphone_stream.connect(gain_node); 
+
+		      script_processor_node = audioContext.createScriptProcessor(BUFF_SIZE, 1, 1);
+		      script_processor_node.onaudioprocess = process_microphone_buffer;
+
+		      microphone_stream.connect(script_processor_node);
+
+		      // --- setup FFT
+
+		      script_processor_fft_node = audioContext.createScriptProcessor(2048, 1, 1);
+		      script_processor_fft_node.connect(gain_node);
+
+		      analyserNode = audioContext.createAnalyser();
+		      analyserNode.smoothingTimeConstant = 0;
+		      analyserNode.fftSize = 2048;
+
+		      microphone_stream.connect(analyserNode);
+
+		      analyserNode.connect(script_processor_fft_node);
+
+		      script_processor_fft_node.onaudioprocess = function() {
+
+		        // get the average for the first channel
+		        var array = new Uint8Array(analyserNode.frequencyBinCount);
+		        analyserNode.getByteFrequencyData(array);
+
+		        // draw the spectrogram
+		        if (microphone_stream.playbackState == microphone_stream.PLAYING_STATE) {
+		        	for( var i = 0; i < positions.length && i < array.length; i++ ){
+			        	positions[ i ] = array[ i ];
+			        }
+		        }
+		      };
+		    }
+
+		</script>
+	</body>
+
+</html>

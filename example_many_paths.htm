@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<meta http-equiv="no-cache">
+	<meta http-equiv="Expires" content="-1">
+	<meta http-equiv="Cache-Control" content="no-cache">
+
+	<head>
+		<title>3D course</title>
+
+		<!-- PLEASE READ THE README FILE wich contains explanations on all the functions
+			 in the Canvas3D library -->
+
+		<!-- these are the libraries needed to run this example,
+			we need some jquery stuff, but also some libs that are used to support
+			the canvas3D library such as csg.js, three.js for 3D rendering, 
+			and objLoader and -exporter in order to load/save .obj files 
+			
+			you can find documentation on these libraries here:
+			http://jquery.org
+			http://threejs.org
+			http://learningthreejs.com/blog/2011/12/10/constructive-solid-geometry-with-csg-js/
+			http://threejs.org/examples/webgl_loader_obj.html
+		-->
+		<script src="lib/jquery-1.8.3.js" type="text/javascript"></script>
+	    <script src="lib/jquery.timer.js" type="text/javascript" ></script>
+		<script src="lib/csg.js"></script>
+		<script src="lib/three.js"></script>
+		<script src="lib/ThreeCSG.js"></script>
+		<script src="lib/OrbitControls.js"></script>
+		<script src="lib/objloader.js"></script>
+		<script src="lib/objexporter.js"></script>
+		<!-- the 'RT' library is my own set of utility finctions, only used
+			to support some math and graphics stuff. there is no documentation
+			on this, but thats not necessary anyway, because you don't interact with it directly ;)
+		-->
+		<script src="lib/RT/RT.js" type="text/javascript" ></script>
+		<script src="lib/RT/Error.js" type="text/javascript" ></script>
+		<script src="lib/RT/Utils.js" type="text/javascript" ></script>
+		<script src="lib/RT/Vec2.js" type="text/javascript" ></script>
+		<script src="lib/RT/MouseInterface.js" type="text/javascript" ></script>
+		<script src="lib/RT/Event.js" type="text/javascript" ></script>
+		<script src="lib/RT/EventDispatcherInterface.js" type="text/javascript" ></script>
+		<script src="lib/RT/KeyboardInterface.js" type="text/javascript" ></script>
+		<script src="lib/RT/LayerInterface.js" type="text/javascript" ></script>
+		<script src="lib/RT/Layer.js" type="text/javascript" ></script>
+
+		<!-- and finally the actual Canvas3D library -->
+		<script src="lib/Canvas3D.js" type="text/javascript" ></script>
+	</head>
+	
+	<body onload="init();">
+
+		<script type="text/javascript">
+
+			// create a new 3d canvas
+			var canvas3D = new KABK.Canvas3D();
+
+			init = function() {
+
+				// initialize it when the page has loaded and the 'init' function is called
+				canvas3D.initialize();
+
+				// stop making me dizzy
+				canvas3D.setAutoRotate( false );
+
+				// position the camera
+				canvas3D.setCameraPosition( 1000, 1000, 1000 );
+				canvas3D.setCameraCenter( 0, 0, 0 );
+
+				// set a grey background color
+				canvas3D.setBackgroundColor( 0.6, 0.6, 0.6 );
+
+				for( var n = 0; n < 10; n++ ){
+					// save the current reference frame
+					canvas3D.save();
+
+					// calculate the direction of one path
+					var x = ( Math.random() - 0.5 ) * 20;
+					var y = ( Math.random() - 0.5 ) * 20;
+					var z = ( Math.random() - 0.5 ) * 20;
+
+					// make the color hue depend on which path is being drawn
+					canvas3D.colorHSL( n / 10.0, 1.0, 0.7 );
+
+					// and create one path by adding spheres, one after another
+					for( var i = 0; i < 100; i++ ){
+
+						// move in the calculated direction 
+						canvas3D.translate( x, y, z );
+
+						// draw a sphere
+						canvas3D.sphere( 10, 12, 12 );
+					}
+					// pop back to the saved reference frame
+					canvas3D.restore();
+				}
+
+				// save the scene as an .obj file
+//				canvas3D.saveOBJ();
+
+				requestAnimationFrame( onRequestAnimationFrame );
+			}
+
+			onRequestAnimationFrame = function() {
+				canvas3D.update();
+				canvas3D.draw();
+				requestAnimationFrame( onRequestAnimationFrame );
+			}
+			    
+		</script>
+	</body>
+
+</html>
