@@ -3,6 +3,17 @@ a simple, entry level library to create 3D shapes using javascript
 
 The Canvas3D software lets you simply place various geometrical shapes, texts and external objects into an empty space where x and z define the ground plane, and y is up. I've tried to keep the commands similar to what you've used for canvas. There's just a 3rd dimension added to the translate, rotate and scaling commands. 
 
+// In order to run all the examples, you have to start a webserver in the directory where all the examples reside. To do this, open a terminal (Applications/utilities/terminal) and type:
+
+cd /path/to/Canvas3D/
+python -m SimpleHTTPServer
+
+// and you will see:
+
+Serving HTTP on 0.0.0.0 port 8000 ...
+
+// this means that a webserver is running now from your directory, allowing you to direct your browser to http://localhost:8000/example_loading_objects.htm This is actually very useful in website development, as you can run everything locally this way. I believe safari loads the page directly, but also firefox needs a local webbrowser. For Windows, you have to download python first, from https://www.python.org/downloads/.
+
 // before you start using the library, you need to create a canvas object like this:
 var canvas3D = new KABK.Canvas3D();
 
@@ -174,22 +185,3 @@ knot( radius, tube, radialSegments, tubularSegments, p, q, heightScale );
 // [ { 'x':x1, 'y':y1, 'z':z1 }, { 'x':x2, 'y':y2, 'z':z2 }, ... ]
 tube( path, segments, radius, radiusSegments, closed );
 
-In order to load external objects, use the .obj format, used for instance by MAYA and most other 3D software. It's actually quite a simple text-based format, so you *could* generate a new model from a script by outputting just a plain-text obj file if you are so inclined ;) see http://en.wikipedia.org/wiki/Wavefront_.obj_file for details.
-you can save .obj files using th saveOBJ() command after you've created the geometry. The file will be downloaded by the browser into your default download folder. Open the .obj file in Meshlab (sometimes this doesnt work, in that case you have to load it in cinema4D, export it, and then load it into meshlab).
-
-In Chrome on Mac, you can load files directly from the harddisk by starting a webserver in your working directory. Open a terminal (Applications/utilities/terminal) and type:
-
-cd /path/to/3DCourse/folder/
-python -m SimpleHTTPServer
-
-and you will see:
-
-Serving HTTP on 0.0.0.0 port 8000 ...
-
-this means that a webserver is running now from your directory, allowing you to direct your browser to http://localhost:8000/example_loading_objects.htm This is actually very useful in website development, as you can run everything locally this way. I believe safari loads the page directly, but also firefox needs a local webbrowser. For Windows, you have to download python first, from https://www.python.org/downloads/.
-
-you need this for the example_heightField_from_image.htm example and the example_loading_objects.htm.
-
-best of luck !
-
-J
