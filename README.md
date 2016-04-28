@@ -38,8 +38,14 @@ and you will see:
 This means that a webserver is running now from your directory, allowing you to direct your browser to 
     
     http://localhost:8000/example_loading_objects.htm
+    
+or to 
 
-This is actually very useful in website development, as you can run everything locally this way. I believe safari loads the page directly, but also firefox needs a local webbrowser. For Windows, you have to download python first, from [https://www.python.org/downloads/](https://www.python.org/downloads/).
+    http://localhost:8000
+    
+which shows you all the files in the Canvas3D-3.0 directory.
+
+This is actually very useful in website development, as you can run everything locally this way. For Windows, you have to download python first, from [https://www.python.org/downloads/](https://www.python.org/downloads/).
 
 ###Canvas
 
