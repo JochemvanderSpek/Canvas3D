@@ -24,6 +24,9 @@ In order to run all the examples, you have to start a webserver in the directory
 and type:
 
     cd /path/to/Canvas3D/
+    
+    if you don't know the path where the Canvas3D-3.0 files are created, you can type 'cd ' in the terminal (without quotes but with the trailing space) and then drag and drop the Canvas3D-3.0 folder from the finder onto the terminal. This will result in the name of the folder being appended as text to the 'cd' command.
+    
     python -m SimpleHTTPServer
 
 and you will see:
