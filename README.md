@@ -19,7 +19,7 @@ The Canvas3D software lets you simply place various geometrical shapes, texts an
 
 ##Getting started
 
-In order to run all the examples, you have to start a webserver in the directory where all the examples reside. To do this, open a terminal 
+In order to run all the examples, you have to start a webserver in the directory where all the examples reside. To do this on OSX, open a terminal 
 
     Applications/utilities/terminal
 
