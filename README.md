@@ -3,6 +3,8 @@
 
 The Canvas3D software lets you simply place various geometrical shapes, texts and external objects into an empty space where x and z define the ground plane, and y is up. I've tried to keep the commands similar to what you've used for canvas. There's just a 3rd dimension added to the translate, rotate and scaling commands.
 
+![screenshot 1](/rsrc/screenshots/screenshot_01.png?raw=true "screenshot 1")
+
 - [Getting started](#getting-started)
     - [Canvas](#canvas)
     - [World, Camera](#world-camera)
