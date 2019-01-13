@@ -79,7 +79,7 @@
 			var audioSrc;
 			var audio;
 
-			var audioContext = new AudioContext();
+			var audioContext = null;
 			var BUFF_SIZE = 16384;
 			var audioInput = null;
 			var microphone_stream = null;
@@ -111,9 +111,29 @@
 				// save the scene as an .obj file
 //				canvas3D.saveOBJ();
 
-			    if (!navigator.getUserMedia)
-			            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
-			                          navigator.mozGetUserMedia || navigator.msGetUserMedia;
+				$('body').click(function(){
+					startAudio();
+				});
+
+				requestAnimationFrame( onRequestAnimationFrame );
+			}
+
+			startAudio = function(e){
+				$('body').unbind( "click" );
+
+				this.audioContext = new AudioContext();
+				this.BUFF_SIZE = 16384;
+				this.audioInput = null;
+				this.microphone_stream = null;
+				this.gain_node = null;
+				this.script_processor_node = null;
+				this.script_processor_fft_node = null;
+				this.analyserNode = null;
+
+
+				if (!navigator.getUserMedia)
+					navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+												navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
 			    if (navigator.getUserMedia){
 			        navigator.getUserMedia({audio:true}, 
@@ -125,8 +145,6 @@
 			          }
 			        );
 			    } else { alert('getUserMedia not supported in this browser.'); }
-
-				requestAnimationFrame( onRequestAnimationFrame );
 			}
 
 			onRequestAnimationFrame = function() {
@@ -139,65 +157,65 @@
 				requestAnimationFrame( onRequestAnimationFrame );
 			}
 
-		    show_some_data = function(given_typed_array, num_row_to_display, label) {
-		        var size_buffer = given_typed_array.length;
-		        var index = 0;
-		        var max_index = num_row_to_display;
+			show_some_data = function(given_typed_array, num_row_to_display, label) {
+					var size_buffer = given_typed_array.length;
+					var index = 0;
+					var max_index = num_row_to_display;
 
-		        console.log("__________ " + label);
+					console.log("__________ " + label);
 
-		        for (; index < max_index && index < size_buffer; index += 1) {
+					for (; index < max_index && index < size_buffer; index += 1) {
 
-		            console.log(given_typed_array[index]);
-		        }
-		    }
+							console.log(given_typed_array[index]);
+					}
+			}
 
-		    process_microphone_buffer = function(event) {
-		        var i, N, inp, microphone_output_buffer;
-		        microphone_output_buffer = event.inputBuffer.getChannelData(0); // just mono - 1 channel for now
-		        // microphone_output_buffer  <-- this buffer contains current gulp of data size BUFF_SIZE
-		        show_some_data(microphone_output_buffer, 5, "from getChannelData");
-		    }
+			process_microphone_buffer = function(event) {
+					var i, N, inp, microphone_output_buffer;
+					microphone_output_buffer = event.inputBuffer.getChannelData(0); // just mono - 1 channel for now
+					// microphone_output_buffer  <-- this buffer contains current gulp of data size BUFF_SIZE
+					show_some_data(microphone_output_buffer, 5, "from getChannelData");
+			}
 
-		    start_microphone = function (stream){
-		      gain_node = audioContext.createGain();
-		      gain_node.connect( audioContext.destination );
+			start_microphone = function (stream){
+				gain_node = audioContext.createGain();
+				gain_node.connect( audioContext.destination );
 
-		      microphone_stream = audioContext.createMediaStreamSource(stream);
-		      microphone_stream.connect(gain_node); 
+				microphone_stream = audioContext.createMediaStreamSource(stream);
+				microphone_stream.connect(gain_node); 
 
-		      script_processor_node = audioContext.createScriptProcessor(BUFF_SIZE, 1, 1);
-		      script_processor_node.onaudioprocess = process_microphone_buffer;
+				script_processor_node = audioContext.createScriptProcessor(BUFF_SIZE, 1, 1);
+				script_processor_node.onaudioprocess = process_microphone_buffer;
 
-		      microphone_stream.connect(script_processor_node);
+				microphone_stream.connect(script_processor_node);
 
-		      // --- setup FFT
+				// --- setup FFT
 
-		      script_processor_fft_node = audioContext.createScriptProcessor(2048, 1, 1);
-		      script_processor_fft_node.connect(gain_node);
+				script_processor_fft_node = audioContext.createScriptProcessor(2048, 1, 1);
+				script_processor_fft_node.connect(gain_node);
 
-		      analyserNode = audioContext.createAnalyser();
-		      analyserNode.smoothingTimeConstant = 0;
-		      analyserNode.fftSize = 2048;
+				analyserNode = audioContext.createAnalyser();
+				analyserNode.smoothingTimeConstant = 0;
+				analyserNode.fftSize = 2048;
 
-		      microphone_stream.connect(analyserNode);
+				microphone_stream.connect(analyserNode);
 
-		      analyserNode.connect(script_processor_fft_node);
+				analyserNode.connect(script_processor_fft_node);
 
-		      script_processor_fft_node.onaudioprocess = function() {
+				script_processor_fft_node.onaudioprocess = function() {
 
-		        // get the average for the first channel
-		        var array = new Uint8Array(analyserNode.frequencyBinCount);
-		        analyserNode.getByteFrequencyData(array);
+					// get the average for the first channel
+					var array = new Uint8Array(analyserNode.frequencyBinCount);
+					analyserNode.getByteFrequencyData(array);
 
-		        // draw the spectrogram
-		        if (microphone_stream.playbackState == microphone_stream.PLAYING_STATE) {
-		        	for( var i = 0; i < positions.length && i < array.length; i++ ){
-			        	positions[ i ] = array[ i ];
-			        }
-		        }
-		      };
-		    }
+					// draw the spectrogram
+					if (microphone_stream.playbackState == microphone_stream.PLAYING_STATE) {
+						for( var i = 0; i < positions.length && i < array.length; i++ ){
+							positions[ i ] = array[ i ];
+						}
+					}
+				};
+			}
 
 		</script>
 	</body>

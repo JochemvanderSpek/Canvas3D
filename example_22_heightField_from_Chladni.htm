@@ -55,6 +55,7 @@
 			// create a new 3d canvas
 			var canvas3D = new KABK.Canvas3D();
 
+			var frequency = 1 / 150;
 			init = function() {
 				// initialize it when the page has loaded and the 'init' function is called
 				canvas3D.initialize();
@@ -70,9 +71,9 @@
 				canvas3D.setBackgroundColor( 0.1, 0.7, 0.9 );
 
 				// create a heightfield driven by a generator for chladni patterns
-				var frequency = 1/ 100;
-				var damping = 0.99;
+				var damping = 1.0;
 				canvas3D.createChladniHeightField( 150, 30, 150, 15, frequency, damping );
+				canvas3D.showChladniImage();
 
 				// after everything is created start the animation loop
 				requestAnimationFrame( onRequestAnimationFrame );
@@ -82,7 +83,7 @@
 				canvas3D.update();
 
 				// and update the chladni pattern
-				canvas3D.updateChladniHeightField();
+				canvas3D.updateChladniHeightField( frequency );
 
 				// draw the objects (the chladni heightfield)
 				canvas3D.draw();
